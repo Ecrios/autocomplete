@@ -1,5 +1,5 @@
-# 🚀 Программа-скрипт для автозавершения текста (AHK v2)
-<img width="397" height="159" alt="image" src="https://github.com/user-attachments/assets/30f72794-e02c-4454-adc6-89d7d442071a" />
+<h1 align="center"> 🎙️ Text Autocomplete Script (AHK v2)</h1>
+<p align="center"> <img width="397" height="159" alt="image" src="https://github.com/user-attachments/assets/16a159f5-f901-4d9a-8fe7-28c8956af2bc" /> </p>
 
 **Русский** | [Read in English](README.md)
 
