@@ -1,5 +1,5 @@
-# 🚀 Text Autocomplete Script (AHK v2)
-<img width="397" height="159" alt="image" src="https://github.com/user-attachments/assets/16a159f5-f901-4d9a-8fe7-28c8956af2bc" />
+<h1 align="center"> 🎙️ Text Autocomplete Script (AHK v2)</h1>
+<p align="center"> <img width="397" height="159" alt="image" src="https://github.com/user-attachments/assets/16a159f5-f901-4d9a-8fe7-28c8956af2bc" /> </p>
 
 [Читать на русском](README.ru.md) | **English**
 
