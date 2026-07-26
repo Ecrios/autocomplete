@@ -32,13 +32,13 @@ ToggleAutoSpace(ItemName, ItemPos, MyMenu) {
 ; Загрузка баз данных
 LoadDictionary()
 
-; Создание GUI (Увеличено до 6 вариантов, ширина увеличена для длинных фраз)
+; Создание GUI (6 вариантов с фиксированной высотой h25 для предотвращения обрезания)
 global MyGui := Gui("+AlwaysOnTop -Caption +ToolWindow")
 MyGui.BackColor := "2E2E2E"
 MyGui.SetFont("s11", "Consolas")
 global Labels := []
 Loop 6 {
-    Labels.Push(MyGui.Add("Text", "w380 cFFFFFF", ""))
+    Labels.Push(MyGui.Add("Text", "w380 h25 cFFFFFF", ""))
 }
 
 ; Скрываем окно при старте
@@ -63,7 +63,6 @@ ProcessChar(ih, char) {
         return
     }
         
-    ; Сбрасываем флаг Backspace
     BackspacePressed := false
         
     ; Буквы и дефис
@@ -71,8 +70,8 @@ ProcessChar(ih, char) {
         CurrentWord .= char
         ShowSuggestions()
     } 
-    ; Знаки окончания предложения (. ? !)
-    else if RegExMatch(char, "[\.\?!]") {
+    ; Знаки окончания фразы/предложения (. ? ! ,)
+    else if RegExMatch(char, "[\.\?!,]") {
         SentenceBuffer .= CurrentWord . char
         if InStr(SentenceBuffer, " ") {
             SavePhrase(Trim(SentenceBuffer))
@@ -81,7 +80,7 @@ ProcessChar(ih, char) {
         LastWord := ""
         SentenceBuffer := ""
     } 
-    ; Запятые, двоеточия
+    ; Двоеточия и прочие знаки
     else {
         SentenceBuffer .= CurrentWord . char
         EndWord()
@@ -91,11 +90,9 @@ ProcessChar(ih, char) {
 EndKeyHandler(ih, *) {
     global CurrentWord, GuiVisible, IsPaused, SentenceBuffer, BackspacePressed, LastWord
     
-    ; Если программа на паузе, ничего не делаем
     if (IsPaused)
         return
 
-    ; Если хук был остановлен программно через .Stop(), выходим (Complete сама его перезапустит)
     if (ih.EndReason = "Stopped")
         return
 
@@ -156,7 +153,6 @@ EndKeyHandler(ih, *) {
         BackspacePressed := false
     }
     
-    ; Гарантированный перезапуск перехватчика для следующего слова
     ih.Start()
     
     if (BackspacePressed) {
@@ -213,8 +209,8 @@ ShowSuggestions() {
     
     if (!GuiVisible) {
         MonitorGetWorkArea(, &left, &top, &right, &bottom)
-        x := right - 400 
-        y := bottom - 160
+        x := right - 410 
+        y := bottom - 210 ; Отступ снизу увеличен: окно приподнято над панелью задач
         MyGui.Show("x" . x . " y" . y . " NoActivate")
         GuiVisible := true
     }
@@ -346,7 +342,6 @@ Complete(index) {
     }
 }
 
-; Функция удаления по номеру варианта (по умолчанию 1)
 DeleteWord(index := 1) {
     global Suggestions, DictFile, Words, Phrases
     if (index <= Suggestions.Length) {
@@ -367,7 +362,7 @@ DeleteWord(index := 1) {
 
 ; --- Пауза и возобновление по F12 ---
 F12:: {
-    global IsPaused, ih, LastWord, SentenceBuffer, CurrentWord
+    global IsPaused, ih, LastWord, SentenceBuffer, CurrentWord, BackspacePressed
     IsPaused := !IsPaused
     if (IsPaused) {
         HideGui()
@@ -375,12 +370,14 @@ F12:: {
         LastWord := ""
         SentenceBuffer := ""
         CurrentWord := ""
+        BackspacePressed := false
         ToolTip("Автозаполнение на ПАУЗЕ")
     } else {
         LastWord := ""
         SentenceBuffer := ""
         CurrentWord := ""
-        ih.Start() ; Перезапускаем перехватчик при возобновлении
+        BackspacePressed := false
+        ih.Start()
         ToolTip("Автозаполнение АКТИВНО")
     }
     SetTimer(RemoveToolTip, -1000)

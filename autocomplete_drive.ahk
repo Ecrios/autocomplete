@@ -32,13 +32,13 @@ ToggleAutoSpace(ItemName, ItemPos, MyMenu) {
 ; Загрузка баз данных
 LoadDictionary()
 
-; Создание GUI (6 вариантов, увеличенная ширина для фраз)
+; Создание GUI (6 вариантов с фиксированной высотой h25 для предотвращения обрезания)
 global MyGui := Gui("+AlwaysOnTop -Caption +ToolWindow")
 MyGui.BackColor := "2E2E2E"
 MyGui.SetFont("s11", "Consolas")
 global Labels := []
 Loop 6 {
-    Labels.Push(MyGui.Add("Text", "w380 cFFFFFF", ""))
+    Labels.Push(MyGui.Add("Text", "w380 h25 cFFFFFF", ""))
 }
 
 ; Скрываем окно при старте
@@ -69,8 +69,8 @@ ProcessChar(ih, char) {
         CurrentWord .= char
         ShowSuggestions()
     } 
-    ; Знаки окончания предложения (. ? !)
-    else if RegExMatch(char, "[\.\?!]") {
+    ; Знаки окончания фразы/предложения (. ? ! ,)
+    else if RegExMatch(char, "[\.\?!,]") {
         SentenceBuffer .= CurrentWord . char
         if InStr(SentenceBuffer, " ") { ; Сохраняем фразу, если в ней больше 1 слова
             SavePhrase(Trim(SentenceBuffer))
@@ -79,7 +79,7 @@ ProcessChar(ih, char) {
         LastWord := ""
         SentenceBuffer := ""
     } 
-    ; Запятые, двоеточия и прочие знаки
+    ; Двоеточия и прочие знаки
     else {
         SentenceBuffer .= CurrentWord . char
         EndWord()
@@ -198,8 +198,8 @@ ShowSuggestions() {
     
     if (!GuiVisible) {
         MonitorGetWorkArea(, &left, &top, &right, &bottom)
-        x := right - 400 
-        y := bottom - 160
+        x := right - 410 
+        y := bottom - 210 ; Отступ снизу увеличен: окно приподнято над панелью задач
         MyGui.Show("x" . x . " y" . y . " NoActivate")
         GuiVisible := true
     }
@@ -331,7 +331,6 @@ Complete(index) {
     }
 }
 
-; Обновленная функция удаления по номеру элемента (по умолчанию 1)
 DeleteWord(index := 1) {
     global Suggestions, Words, Phrases, Transitions
     if (index <= Suggestions.Length) {
@@ -346,7 +345,7 @@ DeleteWord(index := 1) {
         }
             
         SyncDictionaryToFile()
-        ShowSuggestions() ; Обновляем меню на экране
+        ShowSuggestions()
     }
 }
 
